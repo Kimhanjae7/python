@@ -1,0 +1,226 @@
+#< 데이터 구조 정렬 >
+
+
+def selectionSortRec(A,n):  # 재귀적 선택정렬 함수 (최댓값을 뽑아서 맨뒤로 보내는 방법)
+    if(n>2):
+
+        k = theLargest(A,n-1)  # k는 최대값 인덱스
+        A[k],A[n-1]=A[n-1],A[k]  # k와 n-1의 값을 바꾼다 (k를 제일 뒤로 보낸다)
+        selectionSortRec(A,n-1)  # 최대값이 맨뒤에 위치되므로 끝값을 제외한 나머지를 다시 정렬한다
+
+def theLargest(A,last:int):  # 최댓값을 리턴하는 함수
+    largest = 0  # 초깃값 0
+    for i in range(last):  # last 정렬해야하는 부분중 마지막 끝자리
+        if A[i] > A[largest]:
+            largest = i # i값이 최댓값보다 크다면 최댓값을 i값으로 변경
+    return largest  # 최댓값 리턴
+
+import random
+import time
+import sys
+import pandas as pd
+import matplotlib.pyplot as plt  # 모든정렬 종료 후 그래프를 보여주기 위한 코드
+
+df = pd.DataFrame()
+
+sys.setrecursionlimit(1000000)
+listLength=300
+B = [] # B에 실행시간을 넣는 리스트 ★
+for i in range(10000): # 10000번 반복
+    A = []
+    for value in range(0,listLength): # listLength의 크기만큼 반복
+        A.append(random.randint(0,100)) # A리스트에 0~100자연수 삽입
+    start=time.time() # 시작시간
+    selectionSortRec(A,listLength) # listLength 갯수로 함수 실행
+    end=time.time() # 끝시간
+    B.append(end-start)
+
+df["selectionSort"]=pd.DataFrame(B)  # ★
+
+def bubbleSortRec(A,n): # 재귀적 버블정렬 함수 (왼쪽부터 두개씩 비교하여 큰값이 오른쪽으로 이동하는 방법)
+    for i in range(n-1): # 마지막 원소 전 원소가 i+1번째인 마지막 원소와 비교하기 때문에 range n-1
+        if A[i] > A[i+1]: # i원소가 i+1원소보다 클경우에는
+            A[i],A[i+1] = A[i+1],A[i]  # 둘이 자리 바꾼다
+    if n > 1:
+        bubbleSortRec(A,n-1) # 끝자리에 최댓값이 들어갔으므로 그것을 제외한 n-1로 재귀호출
+
+B = [] # B에 실행시간을 넣는 리스트 ★
+for i in range(10000): # 10000번 반복
+    A = []
+    for value in range(0,listLength): # listLength의 크기만큼 반복
+        A.append(random.randint(0,100)) # A리스트에 0~100자연수 삽입
+    start=time.time() # 시작시간
+    bubbleSortRec(A,listLength) # listLength 갯수로 함수 실행
+    end=time.time() # 끝시간
+    B.append(end-start)
+
+df["bubbleSort"] = pd.DataFrame(B)
+
+def insertionSortRec(A,start,end): # 재귀적 삽입정렬 함수 (삽입)
+    value = A[start]  # value에 시작값을 넣는다
+    loc = start # loc은 인덱스 값으로 사용하며 start 인덱스를 넣는다
+    while loc > 0 and A[loc-1] > value: # loc >0 이고 loc 좌측 값이 value 값보다 클때 실행
+        A[loc] = A[loc -1] # loc 값을 좌측에있는 값(loc -1)으로 바꾼다
+        loc -= 1 # loc을 1뺀다 (while문에 다시 비교 후 조건에 맞지 않을 시 탈출)
+    A[loc] = value # value에 있던 값을 1을뺀 A[loc]에 넣는다
+
+    if start + 1 < end: # start + 1 = end 이면 정렬이 끝난 것
+        insertionSortRec(A,start+1,end) # 왼쪽 끝에 최소값이 자리잡았으므로 시작위치를 +1해서 재귀 호출
+
+B = []
+for i in range(10000):
+    A = []
+    for value in range(0,listLength):
+        A.append(random.randint(0,100))
+    start=time.time()
+    insertionSortRec(A,1,listLength-1)
+    end=time.time()
+    B.append(end-start)
+
+df["insertionSort"] = pd.DataFrame(B)
+
+def mergeSort(A,p:int,r:int): # 병합정렬 함수
+    if p < r: # 끝이 시작보다 커야함
+        q = (p+r) // 2 # 배열 반을 쪼개고 q로 둔다
+        mergeSort(A,p,q)  # p~q까지 배열 생성 후 다시 재귀 호출
+        mergeSort(A,q+1,r)  # q+1~r 배열 생성 후 다시 재귀 호출
+        merge(A,p,q,r) # 병합 함수 호출
+
+def merge(A,p:int,q:int,r:int):
+    i = p; j = q+1; t = 0
+    tmp = [0 for i in range(len(A))]
+    while i <= q and j <= r:
+        if A[i] <= A[j]:
+            tmp[t] = A[i]; t += 1; i += 1
+        else:
+            tmp[t] = A[j]; t += 1; j += 1
+    while i <= q:
+        tmp[t] = A[i]; t += 1; i += 1
+    while j <= r:
+        tmp[t] = A[j]; t += 1; j += 1
+    i = p; t = 0
+    while i <= r:
+        A[i] = tmp[t]; t += 1; i += 1
+
+B = []
+for i in range(10000):
+    A = []
+    for value in range(0,listLength):
+        A.append(random.randint(0,100))
+    start=time.time()
+    mergeSort(A,0,listLength-1)
+    end=time.time()
+    B.append(end-start)
+
+df["mergeSort"] = pd.DataFrame(B)
+
+def quickSort(A,p:int,r:int): # 퀵정렬 함수
+    if p < r:
+        q = partition(A,p,r)
+        quickSort(A,p,q-1)
+        quickSort(A,q+1,r)
+
+def partition(A,p:int,r:int):
+    x = A[r]  # x: 기준원소인데 A[r] 우측 끝 원소를 기준으로 잡는다
+    i = p-1
+    for j in range(p,r):  # j가 p부터 r까지 반복
+        if A[j] < x:  # A[j]의 값이 기준원소 x보다 작을 때
+            i += 1  # i값을 1 더한다
+            A[i],A[j] = A[j],A[i]  # A[i]갑과 A[j]값 바꾸기
+    A[i+1],A[r] = A[r],A[i+1]
+    return i+1
+
+B = []
+for i in range(10000):
+    A = []
+    for value in range(0,listLength):
+        A.append(random.randint(0,100))
+    start=time.time()
+    quickSort(A,0,listLength-1)
+    end=time.time()
+    B.append(end-start)
+
+df["quickSort"] = pd.DataFrame(B)
+
+def heapSort(A):  # 힙정렬 함수
+    buildHeap(A)  # 힙으로 만든다
+    for last in range(len(A)-1,0,-1): # 리프노드부터 루트(부모)노드까지 반복
+        A[last],A[0] = A[0],A[last]  # 리프노드를 루트(부모)노드와 값 변경 (스며내리기 하기 위함)
+        percolateDown (A,0,last -1)  # 루트노드부터 값을 바꾼 부분 앞 노드까지 스며내리기 실시
+
+def buildHeap(A):
+    for i in range ((len(A)-2) // 2,-1,-1):  # 맨 마지막노드의 부모노드부터 시작 0까지 작동
+        percolateDown(A,i,len(A)-1)
+
+def percolateDown(A,k:int,end:int):
+    child = 2*k+1  # 좌측 노드는 child
+    right = 2*k+2  # 우측 노드는 right
+    if child <= end:  # 맨마지막 노드의 인덱스가 더 클 때 실행
+        if right <= end and A[child] < A[right]:  # child 값이 right보다 작다면
+            child = right  # child 와 right의 인덱스값 체인지
+
+        if A[k] < A[child]: # child의 값이 A[k]의 값보다 클 때
+            A[k], A[child] = A[child],A[k] # 서로의 값을 바꿔준다
+            percolateDown(A,child,end)  # child를 부모노드로 하여 스며내리기를 반복한다
+
+B = []
+for i in range(10000):
+    A = []
+    for value in range(0,listLength):
+        A.append(random.randint(0,100))
+    start=time.time()
+    heapSort(A)
+    end=time.time()
+    B.append(end-start)
+
+df["heapSort"] = pd.DataFrame(B)
+
+def shellSort(A):  # 쉘정렬 함수
+    H = gapSequence(len(A))  # H 갭수열을 만들어준다
+    for h in H:  # h에 H의 원소를 하나씩 적용한다
+        for k in range(h): # 0부터 h-1만큼 반복
+            stepInsertionSort(A,k,h)  # 삽입정렬한다
+
+def stepInsertionSort(A,k:int,h:int):  #삽입정렬 함수
+    for i in range(k+h,len(A),h): # k+h를 시작,len(A)까지 h만큼 건너뛴다 ex) h=4  K+h,k+2h,k+3h ---
+        j = i - h
+        newItem = A[i]  # newItem은 삽입할 값
+        while 0 <= j and newItem < A[j]:
+            A[j+h]=A[j]
+            j -= h
+        A[j+h] = newItem  # gap만큼 건너뛰면서 newItem이 들어가야할 자리에 값을 삽입한다
+
+def gapSequence(n:int): #갭 수열 만들기
+    H = [1]; gap = 1  #  초깃값으로 H에 원소1을 넣고 gap은 1
+    while gap < n/5:  # n=len(A)
+        gap = 3*gap +1
+        H.append(gap)
+    H.reverse() #gap값이 n/5보다 커지면 while문 탈출후 리버스
+    return H # 갭 수열을 리턴
+
+B = []
+for i in range(10000):
+    A = []
+    for value in range(0,listLength):
+        A.append(random.randint(0,100))
+    start=time.time()
+    shellSort(A)
+    end=time.time()
+    B.append(end-start)
+
+df["shellSort"] = pd.DataFrame(B)
+
+
+
+
+
+
+
+
+
+
+
+
+print(df.mean())
+df.mean().plot(kind='bar') # 그래프
+plt.show()
